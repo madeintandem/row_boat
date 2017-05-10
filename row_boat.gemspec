@@ -26,8 +26,12 @@ Gem::Specification.new do |spec|
   spec.add_dependency "activerecord-import", "~> 0.18.2"
   spec.add_dependency "smarter_csv", "~> 1.1"
 
+  spec.add_development_dependency "awesome_print"
   spec.add_development_dependency "bundler", "~> 1.14"
+  spec.add_development_dependency "pry"
+  spec.add_development_dependency "pry-doc"
+  spec.add_development_dependency "pry-nav"
   spec.add_development_dependency "rake", "~> 10.0"
-  spec.add_development_dependency "rubocop", "~> 0.48.1"
   spec.add_development_dependency "rspec", "~> 3.0"
+  spec.add_development_dependency "rubocop", "~> 0.48.1"
 end
