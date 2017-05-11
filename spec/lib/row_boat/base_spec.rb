@@ -102,6 +102,10 @@ RSpec.describe RowBoat::Base do
     it "includes the key `chunk_size`" do
       expect(subject.options[:chunk_size]).to eq(500)
     end
+
+    it "includes the `validate` key as true" do
+      expect(subject.options[:validate]).to eq(true)
+    end
   end
 
   describe "#import" do
@@ -110,6 +114,14 @@ RSpec.describe RowBoat::Base do
     let(:import_options) { RowBoat::Helpers.extract_import_options(subject.options) }
 
     subject { import_class.new(product_csv_path) }
+
+    def build_subclass_with_options(added_options)
+      build_subclass do
+        define_method :options do
+          super().merge(added_options)
+        end
+      end
+    end
 
     it "imports the csv into the database" do
       expect { subject.import }.to change(Product, :count).from(0).to(3)
@@ -121,7 +133,7 @@ RSpec.describe RowBoat::Base do
     end
 
     it "passes the import options to the active record class' import method" do
-      expect(subject.import_into).to receive(:import!) do |rows, given_import_options|
+      expect(subject.import_into).to receive(:import) do |rows, given_import_options|
         expect(rows).to be_present
         expect(given_import_options).to eq(import_options)
       end
@@ -130,11 +142,7 @@ RSpec.describe RowBoat::Base do
 
     context "wrapping in a transaction" do
       let(:import_class) do
-        build_subclass do
-          define_method :options do
-            super().merge(wrap_in_transaction: true, chunk_size: 1)
-          end
-        end
+        build_subclass_with_options(wrap_in_transaction: true, chunk_size: 1)
       end
 
       subject { import_class.new(product_csv_path) }
@@ -152,11 +160,7 @@ RSpec.describe RowBoat::Base do
 
     context "not wrapping in a transaction" do
       let(:import_class) do
-        build_subclass do
-          define_method :options do
-            super().merge(wrap_in_transaction: false, chunk_size: 1)
-          end
-        end
+        build_subclass_with_options(wrap_in_transaction: false, chunk_size: 1)
       end
 
       subject { import_class.new(product_csv_path) }
@@ -169,6 +173,26 @@ RSpec.describe RowBoat::Base do
         expect(Product.count).to eq(1)
         expect { subject.import }.to raise_error(ActiveRecord::RecordNotUnique)
         expect(Product.count).to eq(3)
+      end
+    end
+
+    context "with validation" do
+      let(:import_class) { build_subclass_with_options(validate: true) }
+
+      subject { import_class.new(invalid_product_csv_path) }
+
+      it "ignores invalid rows" do
+        expect { subject.import }.to change(Product, :count).from(0).to(2)
+      end
+    end
+
+    context "without validation" do
+      let(:import_class) { build_subclass_with_options(validate: false) }
+
+      subject { import_class.new(invalid_product_csv_path) }
+
+      it "does not raise an error when given an invalid row" do
+        expect { subject.import }.to_not raise_error
       end
     end
   end

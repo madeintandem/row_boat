@@ -34,10 +34,11 @@ module RowBoat
 
     def options
       {
+        chunk_size: 500,
         key_mapping: column_mapping,
         remove_unmapped_keys: true,
-        wrap_in_transaction: true,
-        chunk_size: 500
+        validate: true,
+        wrap_in_transaction: true
       }
     end
 
@@ -54,7 +55,7 @@ module RowBoat
 
     def import_rows(rows)
       import_options = ::RowBoat::Helpers.extract_import_options(options)
-      import_into.import!(rows, import_options)
+      import_into.import(rows, import_options)
     end
 
     def transaction_if_needed(&block)

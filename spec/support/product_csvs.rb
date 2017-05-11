@@ -6,4 +6,8 @@ module ProductCSVs
   def product_csv_path
     FILES_PATH.join("products.csv")
   end
+
+  def invalid_product_csv_path
+    FILES_PATH.join("invalid_products.csv")
+  end
 end
