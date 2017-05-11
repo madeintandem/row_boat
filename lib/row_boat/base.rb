@@ -20,8 +20,9 @@ module RowBoat
 
     def import
       csv_options = ::RowBoat::Helpers.extract_csv_options(options)
-      rows = ::SmarterCSV.process(csv_source, csv_options)
-      import_into.import!(rows)
+      ::SmarterCSV.process(csv_source, csv_options) do |rows|
+        import_into.import!(rows)
+      end
     end
 
     def import_into
