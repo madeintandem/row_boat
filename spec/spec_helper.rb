@@ -34,15 +34,9 @@ RSpec.configure do |config|
   config.before :suite do
     dbconfig = YAML.load(File.open("db/config.yml"))
     ActiveRecord::Base.establish_connection(dbconfig["test"])
-    DatabaseCleaner.clean_with(:truncation)
   end
 
   config.before :each do
-    DatabaseCleaner.strategy = :transaction
-    DatabaseCleaner.start
-  end
-
-  config.after :each do
-    DatabaseCleaner.clean
+    DatabaseCleaner.clean_with(:truncation)
   end
 end

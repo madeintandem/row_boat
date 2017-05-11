@@ -20,8 +20,11 @@ module RowBoat
 
     def import
       csv_options = ::RowBoat::Helpers.extract_csv_options(options)
-      ::SmarterCSV.process(csv_source, csv_options) do |rows|
-        import_into.import!(rows)
+
+      transaction_if_needed do
+        ::SmarterCSV.process(csv_source, csv_options) do |rows|
+          import_into.import!(rows)
+        end
       end
     end
 
@@ -36,7 +39,8 @@ module RowBoat
     def options
       {
         key_mapping: column_mapping,
-        remove_unmapped_keys: true
+        remove_unmapped_keys: true,
+        wrap_in_transaction: true
       }
     end
 
@@ -44,6 +48,14 @@ module RowBoat
 
     def not_implemented_error_message(method_name)
       "Subclasses of #{self.class.name} must implement `#{method_name}`"
+    end
+
+    def transaction_if_needed(&block)
+      if options[:wrap_in_transaction]
+        import_into.transaction(&block)
+      else
+        yield
+      end
     end
   end
 end

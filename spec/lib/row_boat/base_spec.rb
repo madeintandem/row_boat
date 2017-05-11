@@ -94,6 +94,10 @@ RSpec.describe RowBoat::Base do
     it "includes the `remove_unmapped_keys` as true" do
       expect(subject.options[:remove_unmapped_keys]).to eq(true)
     end
+
+    it "includes the `wrap_in_transaction` key as true" do
+      expect(subject.options[:wrap_in_transaction]).to eq(true)
+    end
   end
 
   describe "#import" do
@@ -105,6 +109,50 @@ RSpec.describe RowBoat::Base do
     it "imports the csv into the database" do
       expect(SmarterCSV).to receive(:process).with(product_csv_path, csv_options).and_call_original
       expect { subject.import }.to change(Product, :count).from(0).to(3)
+    end
+
+    context "wrapping in a transaction" do
+      let(:import_class) do
+        build_subclass do
+          define_method :options do
+            super().merge(wrap_in_transaction: true, chunk_size: 1)
+          end
+        end
+      end
+
+      subject { import_class.new(product_csv_path) }
+
+      before do
+        Product.create!(name: "foo", rank: 3)
+      end
+
+      it "wraps the imports in a transaction and rolls it back when there's an error" do
+        expect(Product.count).to eq(1)
+        expect { subject.import }.to raise_error(ActiveRecord::RecordNotUnique)
+        expect(Product.count).to eq(1)
+      end
+    end
+
+    context "not wrapping in a transaction" do
+      let(:import_class) do
+        build_subclass do
+          define_method :options do
+            super().merge(wrap_in_transaction: false, chunk_size: 1)
+          end
+        end
+      end
+
+      subject { import_class.new(product_csv_path) }
+
+      before do
+        Product.create!(name: "foo", rank: 3)
+      end
+
+      it "does not wrap the import in a transaction" do
+        expect(Product.count).to eq(1)
+        expect { subject.import }.to raise_error(ActiveRecord::RecordNotUnique)
+        expect(Product.count).to eq(3)
+      end
     end
   end
 end
