@@ -6,6 +6,24 @@ RSpec.describe RowBoat::Base do
   let(:csv_source) { "a file path" }
   subject { described_class.new(csv_source) }
 
+  describe ".import" do
+    subject do
+      Class.new(described_class) do
+        def import_into
+          Product
+        end
+
+        def column_mapping
+          { namey: :name, ranky: :rank, description: :description }
+        end
+      end
+    end
+
+    it "imports the data in the given csv source" do
+      expect { subject.import(product_csv_path) }.to change(Product, :count).from(0).to(3)
+    end
+  end
+
   describe "#initialize" do
     let(:csv_source) { "a file path" }
     subject { described_class.new(csv_source) }

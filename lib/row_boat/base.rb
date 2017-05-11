@@ -8,6 +8,12 @@ module RowBoat
   class Base
     attr_reader :csv_source
 
+    class << self
+      def import(csv_source)
+        new(csv_source).import
+      end
+    end
+
     def initialize(csv_source)
       @csv_source = csv_source
     end
