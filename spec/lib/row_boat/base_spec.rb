@@ -136,6 +136,7 @@ RSpec.describe RowBoat::Base do
       expect(subject.import_into).to receive(:import) do |rows, given_import_options|
         expect(rows).to be_present
         expect(given_import_options).to eq(import_options)
+        double(failed_instances: [])
       end
       subject.import
     end
@@ -177,12 +178,20 @@ RSpec.describe RowBoat::Base do
     end
 
     context "with validation" do
-      let(:import_class) { build_subclass_with_options(validate: true) }
+      let(:import_class) { build_subclass_with_options(validate: true, chunk_size: 3) }
 
       subject { import_class.new(invalid_product_csv_path) }
 
       it "ignores invalid rows" do
         expect { subject.import }.to change(Product, :count).from(0).to(2)
+      end
+
+      it "returns invalid rows" do
+        result = subject.import
+        expect(result[:invalid_records]).to be_present
+        expect(result[:invalid_records].size).to eq(5)
+        expect(result[:invalid_records]).to all(be_a(Product))
+        expect(result[:invalid_records].map(&:description)).to all(eq("invalid"))
       end
     end
 
@@ -193,6 +202,10 @@ RSpec.describe RowBoat::Base do
 
       it "does not raise an error when given an invalid row" do
         expect { subject.import }.to_not raise_error
+      end
+
+      it "returns an empty array for invalid records" do
+        expect(subject.import[:invalid_records]).to eq([])
       end
     end
   end

@@ -19,9 +19,15 @@ module RowBoat
     end
 
     def import
+      import_results = []
+
       transaction_if_needed do
-        parse_rows { |rows| import_rows(rows) }
+        parse_rows do |rows|
+          import_results << import_rows(rows)
+        end
       end
+
+      { invalid_records: import_results.flat_map(&:failed_instances) }
     end
 
     def import_into
