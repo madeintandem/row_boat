@@ -98,17 +98,34 @@ RSpec.describe RowBoat::Base do
     it "includes the `wrap_in_transaction` key as true" do
       expect(subject.options[:wrap_in_transaction]).to eq(true)
     end
+
+    it "includes the key `chunk_size`" do
+      expect(subject.options[:chunk_size]).to eq(500)
+    end
   end
 
   describe "#import" do
     let(:import_class) { build_subclass }
     let(:csv_options) { RowBoat::Helpers.extract_csv_options(subject.options) }
+    let(:import_options) { RowBoat::Helpers.extract_import_options(subject.options) }
 
     subject { import_class.new(product_csv_path) }
 
     it "imports the csv into the database" do
-      expect(SmarterCSV).to receive(:process).with(product_csv_path, csv_options).and_call_original
       expect { subject.import }.to change(Product, :count).from(0).to(3)
+    end
+
+    it "passes the csv options to the csv parser" do
+      expect(SmarterCSV).to receive(:process).with(product_csv_path, csv_options).and_call_original
+      subject.import
+    end
+
+    it "passes the import options to the active record class' import method" do
+      expect(subject.import_into).to receive(:import!) do |rows, given_import_options|
+        expect(rows).to be_present
+        expect(given_import_options).to eq(import_options)
+      end
+      subject.import
     end
 
     context "wrapping in a transaction" do

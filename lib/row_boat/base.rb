@@ -20,9 +20,7 @@ module RowBoat
 
     def import
       transaction_if_needed do
-        parse_rows do |rows|
-          import_into.import!(rows)
-        end
+        parse_rows { |rows| import_rows(rows) }
       end
     end
 
@@ -38,7 +36,8 @@ module RowBoat
       {
         key_mapping: column_mapping,
         remove_unmapped_keys: true,
-        wrap_in_transaction: true
+        wrap_in_transaction: true,
+        chunk_size: 500
       }
     end
 
@@ -51,6 +50,11 @@ module RowBoat
     def parse_rows(&block)
       csv_options = ::RowBoat::Helpers.extract_csv_options(options)
       ::SmarterCSV.process(csv_source, csv_options, &block)
+    end
+
+    def import_rows(rows)
+      import_options = ::RowBoat::Helpers.extract_import_options(options)
+      import_into.import!(rows, import_options)
     end
 
     def transaction_if_needed(&block)
