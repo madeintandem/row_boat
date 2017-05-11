@@ -16,12 +16,11 @@ module RowBoat
       raise NotImplementedError, not_implemented_error_message(__method__)
     end
 
-    def csv_options
-      {}
-    end
-
-    def import_options
-      {}
+    def options
+      {
+        key_mapping: column_mapping,
+        remove_unmapped_keys: true
+      }
     end
 
     private

@@ -27,15 +27,22 @@ RSpec.describe RowBoat::Base do
     end
   end
 
-  describe "#csv_options" do
-    it "is a hash" do
-      expect(subject.csv_options).to eq({})
+  describe "#options" do
+    let(:column_mapping) { { column: :map } }
+    before do
+      expect(subject).to receive(:column_mapping).and_return(column_mapping)
     end
-  end
 
-  describe "#import_options" do
     it "is a hash" do
-      expect(subject.import_options).to eq({})
+      expect(subject.options).to be_a(Hash)
+    end
+
+    it "includes the column_mapping as `key_mapping`" do
+      expect(subject.options[:key_mapping]).to eq(column_mapping)
+    end
+
+    it "includes the `remove_unmapped_keys` as true" do
+      expect(subject.options[:remove_unmapped_keys]).to eq(true)
     end
   end
 end
