@@ -6,21 +6,40 @@ RSpec.describe RowBoat::Base do
   let(:csv_source) { "a file path" }
   subject { described_class.new(csv_source) }
 
-  describe ".import" do
-    subject do
-      Class.new(described_class) do
-        def import_into
-          Product
-        end
-
-        def column_mapping
-          { namey: :name, ranky: :rank, description: :description }
-        end
+  def build_subclass(&block)
+    Class.new(described_class) do
+      def import_into
+        Product
       end
+
+      def column_mapping
+        { namey: :name, ranky: :rank, description: :description }
+      end
+
+      instance_eval(&block) if block
     end
+  end
+
+  describe ".import" do
+    subject { build_subclass }
 
     it "imports the data in the given csv source" do
       expect { subject.import(product_csv_path) }.to change(Product, :count).from(0).to(3)
+    end
+
+    context "when initialize is overridden" do
+      subject do
+        build_subclass do
+          define_method :initialize do |path, some_number|
+            super(path)
+          end
+        end
+      end
+
+      it "passes its arguments through to new" do
+        expect(subject).to receive(:new).with(product_csv_path, 5).and_call_original
+        subject.import(product_csv_path, 5)
+      end
     end
   end
 
@@ -65,17 +84,7 @@ RSpec.describe RowBoat::Base do
   end
 
   describe "#import" do
-    let(:import_class) do
-      Class.new(described_class) do
-        def import_into
-          Product
-        end
-
-        def column_mapping
-          { namey: :name, ranky: :rank, description: :description }
-        end
-      end
-    end
+    let(:import_class) { build_subclass }
     let(:csv_options) { RowBoat::Helpers.extract_csv_options(subject.options) }
 
     subject { import_class.new(product_csv_path) }

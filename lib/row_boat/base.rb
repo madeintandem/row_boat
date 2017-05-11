@@ -9,8 +9,8 @@ module RowBoat
     attr_reader :csv_source
 
     class << self
-      def import(csv_source)
-        new(csv_source).import
+      def import(*args)
+        new(*args).import
       end
     end
 
