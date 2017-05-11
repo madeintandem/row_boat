@@ -138,9 +138,30 @@ RSpec.describe RowBoat::Base do
     it "imports the rows" do
       expect(subject).to receive(:import_rows) do |rows|
         expect(rows).to be_present
-        double(failed_instances: [])
+        double(failed_instances: [], num_inserts: 0, ids: [])
       end
       subject.import
+    end
+
+    context "total inserted" do
+      let(:import_class) { build_subclass_with_options(chunk_size: 1) }
+      subject { import_class.new(product_csv_path) }
+
+      it "is the total number of records inserted" do
+        expect(subject.import[:total_inserted]).to eq(3)
+      end
+    end
+
+    context "inserted ids" do
+      let!(:product) { Product.create!(name: "zuh", rank: 5000) }
+      let(:import_class) { build_subclass_with_options(chunk_size: 1) }
+      subject { import_class.new(product_csv_path) }
+
+      it "is all of the inserted ids" do
+        result = subject.import
+        expected_ids = Product.where.not(id: product.id).pluck(:id)
+        expect(result[:inserted_ids]).to match_array(expected_ids)
+      end
     end
 
     context "wrapping in a transaction" do

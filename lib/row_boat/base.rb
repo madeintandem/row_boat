@@ -27,7 +27,11 @@ module RowBoat
         end
       end
 
-      { invalid_records: import_results.flat_map(&:failed_instances) }
+      import_results.each_with_object(invalid_records: [], total_inserted: 0, inserted_ids: []) do |import_result, total_results|
+        total_results[:invalid_records] += import_result.failed_instances
+        total_results[:total_inserted] += import_result.num_inserts
+        total_results[:inserted_ids] += import_result.ids
+      end
     end
 
     def import_into
