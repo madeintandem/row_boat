@@ -38,6 +38,16 @@ module RowBoat
       raise NotImplementedError, not_implemented_error_message(__method__)
     end
 
+    def preprocess_row(row)
+      row
+    end
+
+    def import_rows(rows)
+      import_options = ::RowBoat::Helpers.extract_import_options(options)
+      preprocessed_rows = rows.map { |row| preprocess_row(row) }
+      import_into.import(preprocessed_rows, import_options)
+    end
+
     def options
       {
         chunk_size: 500,
@@ -57,11 +67,6 @@ module RowBoat
     def parse_rows(&block)
       csv_options = ::RowBoat::Helpers.extract_csv_options(options)
       ::SmarterCSV.process(csv_source, csv_options, &block)
-    end
-
-    def import_rows(rows)
-      import_options = ::RowBoat::Helpers.extract_import_options(options)
-      import_into.import(rows, import_options)
     end
 
     def transaction_if_needed(&block)

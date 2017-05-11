@@ -111,7 +111,6 @@ RSpec.describe RowBoat::Base do
   describe "#import" do
     let(:import_class) { build_subclass }
     let(:csv_options) { RowBoat::Helpers.extract_csv_options(subject.options) }
-    let(:import_options) { RowBoat::Helpers.extract_import_options(subject.options) }
 
     subject { import_class.new(product_csv_path) }
 
@@ -132,10 +131,9 @@ RSpec.describe RowBoat::Base do
       subject.import
     end
 
-    it "passes the import options to the active record class' import method" do
-      expect(subject.import_into).to receive(:import) do |rows, given_import_options|
+    it "imports the rows" do
+      expect(subject).to receive(:import_rows) do |rows|
         expect(rows).to be_present
-        expect(given_import_options).to eq(import_options)
         double(failed_instances: [])
       end
       subject.import
@@ -207,6 +205,46 @@ RSpec.describe RowBoat::Base do
       it "returns an empty array for invalid records" do
         expect(subject.import[:invalid_records]).to eq([])
       end
+    end
+  end
+
+  describe "#preprocess_row" do
+    let(:row) { { column: :value } }
+
+    it "is the given row" do
+      expect(subject.preprocess_row(row)).to equal(row)
+    end
+  end
+
+  describe "#import_rows" do
+    let(:row) { { name: "foo", rank: 1 } }
+    let(:rows) { [row] }
+    let(:import_class) do
+      build_subclass do
+        define_method :preprocess_row do |row|
+          row.merge(name: "preprocessed")
+        end
+      end
+    end
+    subject { import_class.new(product_csv_path) }
+    let(:import_options) { RowBoat::Helpers.extract_import_options(subject.options) }
+
+    it "imports the given rows" do
+      expect { subject.import_rows(rows) }.to change(Product, :count).from(0).to(1)
+    end
+
+    it "passes the import options to the active record class' import method" do
+      expect(subject.import_into).to receive(:import) do |rows, given_import_options|
+        expect(rows).to be_present
+        expect(given_import_options).to eq(import_options)
+        double(failed_instances: [])
+      end
+      subject.import_rows(rows)
+    end
+
+    it "preprocesses the rows before importing them" do
+      subject.import_rows(rows)
+      expect(Product.first.name).to eq("preprocessed")
     end
   end
 end
