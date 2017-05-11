@@ -30,15 +30,28 @@ RSpec.describe RowBoat::Base do
     context "when initialize is overridden" do
       subject do
         build_subclass do
-          define_method :initialize do |path, some_number|
+          define_method :initialize do |path, x, y, z, &block|
             super(path)
           end
         end
       end
 
+      let(:block) { proc { "I'm a proc" } }
+      let(:dummy) { double(import: true) }
+
       it "passes its arguments through to new" do
-        expect(subject).to receive(:new).with(product_csv_path, 5).and_call_original
-        subject.import(product_csv_path, 5)
+        expect(dummy).to receive(:import)
+
+        expect(subject).to receive(:new) do |path, x, y, z, &given_block|
+          expect(path).to eq(product_csv_path)
+          expect(x).to eq(1)
+          expect(y).to eq(2)
+          expect(z).to eq(3)
+          expect(given_block).to eq(block)
+          dummy
+        end
+
+        subject.import(product_csv_path, 1, 2, 3, &block)
       end
     end
   end
