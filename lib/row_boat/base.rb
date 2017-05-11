@@ -59,11 +59,7 @@ module RowBoat
     end
 
     def transaction_if_needed(&block)
-      if options[:wrap_in_transaction]
-        import_into.transaction(&block)
-      else
-        yield
-      end
+      options[:wrap_in_transaction] ? import_into.transaction(&block) : yield
     end
   end
 end
