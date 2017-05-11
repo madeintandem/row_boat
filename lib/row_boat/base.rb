@@ -1,11 +1,21 @@
 # frozen_string_literal: true
 
+require "active_record"
+require "activerecord-import"
+require "smarter_csv"
+
 module RowBoat
   class Base
     attr_reader :csv_source
 
     def initialize(csv_source)
       @csv_source = csv_source
+    end
+
+    def import
+      csv_options = ::RowBoat::Helpers.extract_csv_options(options)
+      rows = ::SmarterCSV.process(csv_source, csv_options)
+      import_into.import!(rows)
     end
 
     def import_into

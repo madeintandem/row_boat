@@ -45,4 +45,26 @@ RSpec.describe RowBoat::Base do
       expect(subject.options[:remove_unmapped_keys]).to eq(true)
     end
   end
+
+  describe "#import" do
+    let(:import_class) do
+      Class.new(described_class) do
+        def import_into
+          Product
+        end
+
+        def column_mapping
+          { namey: :name, ranky: :rank, description: :description }
+        end
+      end
+    end
+    let(:csv_options) { RowBoat::Helpers.extract_csv_options(subject.options) }
+
+    subject { import_class.new(product_csv_path) }
+
+    it "imports the csv into the database" do
+      expect(SmarterCSV).to receive(:process).with(product_csv_path, csv_options).and_call_original
+      expect { subject.import }.to change(Product, :count).from(0).to(3)
+    end
+  end
 end

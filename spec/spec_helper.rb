@@ -7,8 +7,11 @@ require "database_cleaner"
 require "yaml"
 
 require_relative "./support/product"
+require_relative "./support/product_csvs"
 
 RSpec.configure do |config|
+  config.include ProductCSVs
+
   # Enable flags like --only-failures and --next-failure
   config.example_status_persistence_file_path = ".rspec_status"
 
