@@ -52,6 +52,7 @@ module RowBoat
       {
         chunk_size: 500,
         key_mapping: column_mapping,
+        recursive: true,
         remove_unmapped_keys: true,
         validate: true,
         wrap_in_transaction: true

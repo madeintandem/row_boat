@@ -106,6 +106,10 @@ RSpec.describe RowBoat::Base do
     it "includes the `validate` key as true" do
       expect(subject.options[:validate]).to eq(true)
     end
+
+    it "includes the recursive key as true" do
+      expect(subject.options[:recursive]).to eq(true)
+    end
   end
 
   describe "#import" do
