@@ -27,7 +27,9 @@ module RowBoat
         end
       end
 
-      process_import_results(import_results)
+      process_import_results(import_results).tap do |total_results|
+        handle_failed_rows(total_results[:invalid_records])
+      end
     end
 
     def import_into
@@ -72,6 +74,14 @@ module RowBoat
 
     def merged_options
       default_options.merge(options)
+    end
+
+    def handle_failed_row(row)
+      row
+    end
+
+    def handle_failed_rows(rows)
+      rows.each { |row| handle_failed_row(row) }
     end
 
     private

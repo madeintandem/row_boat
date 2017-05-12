@@ -269,6 +269,29 @@ RSpec.describe RowBoat::Base do
         expect(subject.import[:invalid_records]).to eq([])
       end
     end
+
+    context "with failures" do
+      let(:import_class) do
+        build_subclass do
+          define_method :handle_failed_row do |row|
+            row.name = ":("
+          end
+        end
+      end
+
+      subject { import_class.new(invalid_product_csv_path) }
+
+      it "handles the failed rows" do
+        expect(subject).to receive(:handle_failed_rows).and_call_original
+
+        invalid_records = subject.import[:invalid_records]
+
+        expect(invalid_records).to be_present
+        invalid_records.each do |invalid_record|
+          expect(invalid_record.name).to eq(":(")
+        end
+      end
+    end
   end
 
   describe "#preprocess_row" do
@@ -343,6 +366,42 @@ RSpec.describe RowBoat::Base do
 
       it "does not return nil values in the collection" do
         expect(subject.preprocess_rows(rows)).to eq([row_1])
+      end
+    end
+  end
+
+  describe "#handle_failed_row" do
+    let(:failed_row) { { i_have: :failed } }
+
+    it "returns the failed instance" do
+      expect(subject.handle_failed_row(failed_row)).to equal(failed_row)
+    end
+  end
+
+  describe "#handle_failed_rows" do
+    let(:import_class) do
+      build_subclass do
+        define_method :handle_failed_row do |row|
+          row[:name] = ":("
+          row
+        end
+      end
+    end
+    subject { import_class.new(product_csv_path) }
+
+    let(:rows) do
+      [
+        { name: "foo" },
+        { name: "bar" },
+        { name: "baz" }
+      ]
+    end
+
+    it "handles each failed row" do
+      expect(subject).to receive(:handle_failed_row).exactly(3).times.and_call_original
+      subject.handle_failed_rows(rows)
+      rows.each do |row|
+        expect(row).to eq(name: ":(")
       end
     end
   end
