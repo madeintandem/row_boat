@@ -47,12 +47,16 @@ module RowBoat
     end
 
     def import_rows(rows)
-      import_options = ::RowBoat::Helpers.extract_import_options(options)
+      import_options = ::RowBoat::Helpers.extract_import_options(merged_options)
       preprocessed_rows = rows.map { |row| preprocess_row(row) }
       import_into.import(preprocessed_rows, import_options)
     end
 
     def options
+      {}
+    end
+
+    def default_options
       {
         chunk_size: 500,
         key_mapping: column_mapping,
@@ -63,6 +67,10 @@ module RowBoat
       }
     end
 
+    def merged_options
+      default_options.merge(options)
+    end
+
     private
 
     def not_implemented_error_message(method_name)
@@ -70,12 +78,12 @@ module RowBoat
     end
 
     def parse_rows(&block)
-      csv_options = ::RowBoat::Helpers.extract_csv_options(options)
+      csv_options = ::RowBoat::Helpers.extract_csv_options(merged_options)
       ::SmarterCSV.process(csv_source, csv_options, &block)
     end
 
     def transaction_if_needed(&block)
-      options[:wrap_in_transaction] ? import_into.transaction(&block) : yield
+      merged_options[:wrap_in_transaction] ? import_into.transaction(&block) : yield
     end
   end
 end

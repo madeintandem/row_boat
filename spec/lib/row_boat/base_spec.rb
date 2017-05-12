@@ -78,50 +78,88 @@ RSpec.describe RowBoat::Base do
   end
 
   describe "#options" do
+    it "is an empty hash" do
+      expect(subject.options).to eq({})
+    end
+  end
+
+  describe "#default_options" do
     let(:column_mapping) { { column: :map } }
     before do
       expect(subject).to receive(:column_mapping).and_return(column_mapping)
     end
 
     it "is a hash" do
-      expect(subject.options).to be_a(Hash)
+      expect(subject.default_options).to be_a(Hash)
     end
 
     it "includes the column_mapping as `key_mapping`" do
-      expect(subject.options[:key_mapping]).to eq(column_mapping)
+      expect(subject.default_options[:key_mapping]).to eq(column_mapping)
     end
 
     it "includes the `remove_unmapped_keys` as true" do
-      expect(subject.options[:remove_unmapped_keys]).to eq(true)
+      expect(subject.default_options[:remove_unmapped_keys]).to eq(true)
     end
 
     it "includes the `wrap_in_transaction` key as true" do
-      expect(subject.options[:wrap_in_transaction]).to eq(true)
+      expect(subject.default_options[:wrap_in_transaction]).to eq(true)
     end
 
     it "includes the key `chunk_size`" do
-      expect(subject.options[:chunk_size]).to eq(500)
+      expect(subject.default_options[:chunk_size]).to eq(500)
     end
 
     it "includes the `validate` key as true" do
-      expect(subject.options[:validate]).to eq(true)
+      expect(subject.default_options[:validate]).to eq(true)
     end
 
     it "includes the recursive key as true" do
-      expect(subject.options[:recursive]).to eq(true)
+      expect(subject.default_options[:recursive]).to eq(true)
+    end
+  end
+
+  describe "#merged_options" do
+    context "#options isn't defined" do
+      let(:import_class) { build_subclass }
+      subject { import_class.new(product_csv_path) }
+
+      it "is default options" do
+        expect(subject.merged_options).to eq(subject.default_options)
+      end
+    end
+
+    context "#options is defined" do
+      let(:import_class) do
+        build_subclass do
+          define_method :options do
+            { wrap_in_transaction: false, foo: true }
+          end
+        end
+      end
+      subject { import_class.new(product_csv_path) }
+
+      it "is default options with options merged in" do
+        expect(subject.merged_options[:foo]).to eq(true)
+        expect(subject.merged_options[:wrap_in_transaction]).to eq(false)
+
+        subject.default_options.each do |key, value|
+          next if key == :wrap_in_transaction
+          expect(subject.merged_options[key]).to eq(value)
+        end
+      end
     end
   end
 
   describe "#import" do
     let(:import_class) { build_subclass }
-    let(:csv_options) { RowBoat::Helpers.extract_csv_options(subject.options) }
+    let(:csv_options) { RowBoat::Helpers.extract_csv_options(subject.merged_options) }
 
     subject { import_class.new(product_csv_path) }
 
     def build_subclass_with_options(added_options)
       build_subclass do
         define_method :options do
-          super().merge(added_options)
+          added_options
         end
       end
     end
@@ -252,7 +290,7 @@ RSpec.describe RowBoat::Base do
       end
     end
     subject { import_class.new(product_csv_path) }
-    let(:import_options) { RowBoat::Helpers.extract_import_options(subject.options) }
+    let(:import_options) { RowBoat::Helpers.extract_import_options(subject.merged_options) }
 
     it "imports the given rows" do
       expect { subject.import_rows(rows) }.to change(Product, :count).from(0).to(1)
