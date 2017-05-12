@@ -27,11 +27,7 @@ module RowBoat
         end
       end
 
-      import_results.each_with_object(invalid_records: [], total_inserted: 0, inserted_ids: []) do |import_result, total_results|
-        total_results[:invalid_records] += import_result.failed_instances
-        total_results[:total_inserted] += import_result.num_inserts
-        total_results[:inserted_ids] += import_result.ids
-      end
+      process_import_results(import_results)
     end
 
     def import_into
@@ -84,6 +80,18 @@ module RowBoat
 
     def transaction_if_needed(&block)
       merged_options[:wrap_in_transaction] ? import_into.transaction(&block) : yield
+    end
+
+    def process_import_results(import_results)
+      import_results.each_with_object(
+        invalid_records: [],
+        total_inserted: 0,
+        inserted_ids: []
+      ) do |import_result, total_results|
+        total_results[:invalid_records] += import_result.failed_instances
+        total_results[:total_inserted] += import_result.num_inserts
+        total_results[:inserted_ids] += import_result.ids
+      end
     end
   end
 end
