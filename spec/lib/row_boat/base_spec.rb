@@ -85,8 +85,10 @@ RSpec.describe RowBoat::Base do
 
   describe "#default_options" do
     let(:column_mapping) { { column: :map } }
+    let(:value_converter_mapping) { { value: :converter } }
     before do
       expect(subject).to receive(:column_mapping).and_return(column_mapping)
+      expect(subject).to receive(:csv_value_converters).and_return(value_converter_mapping)
     end
 
     it "is a hash" do
@@ -115,6 +117,10 @@ RSpec.describe RowBoat::Base do
 
     it "includes the recursive key as true" do
       expect(subject.default_options[:recursive]).to eq(true)
+    end
+
+    it "includes the value converters" do
+      expect(subject.default_options[:value_converters]).to eq(value_converter_mapping)
     end
   end
 
@@ -292,6 +298,27 @@ RSpec.describe RowBoat::Base do
         end
       end
     end
+
+    context "with value converters" do
+      let(:import_class) do
+        build_subclass do
+          define_method :value_converters do
+            { name: :convert_name }
+          end
+
+          define_method :convert_name do |value|
+            "#{value}-fu"
+          end
+        end
+      end
+      subject { import_class.new(product_csv_path) }
+
+      it "uses the converters" do
+        subject.import
+        expect(Product.count).to eq(3)
+        expect(Product.pluck(:name)).to all(end_with("-fu"))
+      end
+    end
   end
 
   describe "#preprocess_row" do
@@ -402,6 +429,81 @@ RSpec.describe RowBoat::Base do
       subject.handle_failed_rows(rows)
       rows.each do |row|
         expect(row).to eq(name: ":(")
+      end
+    end
+  end
+
+  describe "#value_converters" do
+    it "is an empty hash" do
+      expect(subject.value_converters).to eq({})
+    end
+  end
+
+  describe "#csv_value_converters" do
+    def build_subclass_with_value_converters(value_converters)
+      build_subclass do
+        define_method :value_converters do
+          value_converters
+        end
+
+        define_method :a_converter_method do |value|
+        end
+      end
+    end
+
+    context "value converter is nil" do
+      let(:import_class) { build_subclass_with_value_converters(name: nil) }
+      subject { import_class.new(product_csv_path) }
+
+      it "removes the key and nil from the hash" do
+        expect(subject.csv_value_converters).to eq({})
+      end
+    end
+
+    context "value converter is something else" do
+      let(:import_class) { build_subclass_with_value_converters(name: Product) }
+      subject { import_class.new(product_csv_path) }
+
+      it "leaves the value alone" do
+        expect(subject.csv_value_converters).to eq(name: Product)
+      end
+    end
+
+    context "value converter is a proc" do
+      let(:block) { proc { "I'm a proc" } }
+      let(:import_class) { build_subclass_with_value_converters(name: block) }
+      subject { import_class.new(product_csv_path) }
+
+      it "wraps the proc in a value converter" do
+        result = subject.csv_value_converters[:name]
+        expect(result).to be_a(RowBoat::ValueConverter)
+        expect(result.converter).to eq(block)
+      end
+    end
+
+    context "value converter is a lambda" do
+      let(:block) { -> { "I'm a lambda" } }
+      let(:import_class) { build_subclass_with_value_converters(name: block) }
+      subject { import_class.new(product_csv_path) }
+
+      it "wraps the lambda in a value converter" do
+        result = subject.csv_value_converters[:name]
+        expect(result).to be_a(RowBoat::ValueConverter)
+        expect(result.converter).to eq(block)
+      end
+    end
+
+    context "value converter is a symbol" do
+      let(:converter_method) { :a_converter_method }
+      let(:import_class) { build_subclass_with_value_converters(name: converter_method) }
+      subject { import_class.new(product_csv_path) }
+
+      it "wraps the symbol in a proc which is wrapped in a value converter" do
+        result = subject.csv_value_converters[:name]
+        expect(result).to be_a(RowBoat::ValueConverter)
+        expect(result.converter).to be_a(Proc)
+        expect(subject).to receive(converter_method).with(5)
+        result.convert(5)
       end
     end
   end

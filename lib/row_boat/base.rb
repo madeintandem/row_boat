@@ -68,6 +68,7 @@ module RowBoat
         recursive: true,
         remove_unmapped_keys: true,
         validate: true,
+        value_converters: csv_value_converters,
         wrap_in_transaction: true
       }
     end
@@ -82,6 +83,25 @@ module RowBoat
 
     def handle_failed_rows(rows)
       rows.each { |row| handle_failed_row(row) }
+    end
+
+    def value_converters
+      {}
+    end
+
+    def csv_value_converters
+      value_converters.each_with_object({}) do |(key, potential_converter), converters_hash|
+        case potential_converter
+        when Proc
+          converters_hash[key] = ::RowBoat::ValueConverter.new(&potential_converter)
+        when Symbol
+          converters_hash[key] = ::RowBoat::ValueConverter.new { |value| public_send(potential_converter, value) }
+        when nil
+          next
+        else
+          converters_hash[key] = potential_converter
+        end
+      end
     end
 
     private
