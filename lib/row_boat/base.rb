@@ -44,8 +44,15 @@ module RowBoat
 
     def import_rows(rows)
       import_options = ::RowBoat::Helpers.extract_import_options(merged_options)
-      preprocessed_rows = rows.map { |row| preprocess_row(row) }
+      preprocessed_rows = preprocess_rows(rows)
       import_into.import(preprocessed_rows, import_options)
+    end
+
+    def preprocess_rows(rows)
+      rows.each_with_object([]) do |row, preprocessed_rows|
+        preprocessed_row = preprocess_row(row)
+        preprocessed_rows << preprocessed_row unless preprocessed_row.nil?
+      end
     end
 
     def options

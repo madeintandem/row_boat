@@ -306,8 +306,44 @@ RSpec.describe RowBoat::Base do
     end
 
     it "preprocesses the rows before importing them" do
+      expect(subject).to receive(:preprocess_rows).and_call_original
       subject.import_rows(rows)
       expect(Product.first.name).to eq("preprocessed")
+    end
+  end
+
+  describe "#preprocess_rows" do
+    let(:row) { { name: "foo", rank: 3 } }
+    let(:rows) { [row] }
+    let(:import_class) do
+      build_subclass do
+        define_method :preprocess_row do |row|
+          row.merge(name: "preprocessed")
+        end
+      end
+    end
+    subject { import_class.new(product_csv_path) }
+
+    it "preprocesses the rows with `preprocess_row`" do
+      expect(subject.preprocess_rows(rows)).to eq([{ name: "preprocessed", rank: 3 }])
+    end
+
+    context "`preprocess_row` returns nil" do
+      let(:row_1) { { name: "foo", rank: 2 } }
+      let(:row_2) { { name: "foo", rank: 3 } }
+      let(:rows) { [row_1, row_2] }
+      let(:import_class) do
+        build_subclass do
+          define_method :preprocess_row do |row|
+            row[:rank] == 3 ? nil : row
+          end
+        end
+      end
+      subject { import_class.new(product_csv_path) }
+
+      it "does not return nil values in the collection" do
+        expect(subject.preprocess_rows(rows)).to eq([row_1])
+      end
     end
   end
 end
