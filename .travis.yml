@@ -2,4 +2,11 @@ sudo: false
 language: ruby
 rvm:
   - 2.3.3
+  - 2.4.1
+addons:
+  postgresql: '9.6'
 before_install: gem install bundler -v 1.14.6
+before_script:
+  - bundle exec rake db:create
+  - bundle exec rake db:migrate
+cache: bundler
