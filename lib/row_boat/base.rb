@@ -104,7 +104,7 @@ module RowBoat
       row
     end
 
-    # api private
+    # @api private
     def import_rows(rows)
       import_options = ::RowBoat::Helpers.extract_import_options(merged_options)
       preprocessed_rows = preprocess_rows(rows)
