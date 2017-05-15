@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-# @api private
 module RowBoat
+  # @api private
   module Helpers
     CSV_OPTION_KEYS = %i[
       chunk_size
