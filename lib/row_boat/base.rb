@@ -9,6 +9,16 @@ module RowBoat
     attr_reader :csv_source
 
     class << self
+      # Imports database records from the given CSV-like object.
+      #
+      # @abstract Feel free to override this if you need additional arguments
+      #   to process your CSV. Just make sure it matches the method signature of {#initialize}.
+      #   (If you override {#initialize} then match that method signature)
+      #
+      # @overload import(csv_source)
+      #   @param csv_source [String, #read] a CSV-like object that SmarterCSV can read.
+      # @return [Hash] a hash with +:invalid_records+, +:total_inserted+ and +:inserted_ids+.
+      # @see https://github.com/tilo/smarter_csv#documentation SmarterCSV Docs
       def import(*args, &block)
         new(*args, &block).import
       end
@@ -61,6 +71,7 @@ module RowBoat
       {}
     end
 
+    # @api private
     def default_options
       {
         chunk_size: 500,
@@ -73,6 +84,7 @@ module RowBoat
       }
     end
 
+    # @api private
     def merged_options
       default_options.merge(options)
     end
@@ -89,6 +101,7 @@ module RowBoat
       {}
     end
 
+    # @api private
     def csv_value_converters
       value_converters.each_with_object({}) do |(key, potential_converter), converters_hash|
         case potential_converter
@@ -106,19 +119,27 @@ module RowBoat
 
     private
 
+    # @api private
+    # @private
     def not_implemented_error_message(method_name)
       "Subclasses of #{self.class.name} must implement `#{method_name}`"
     end
 
+    # @api private
+    # @private
     def parse_rows(&block)
       csv_options = ::RowBoat::Helpers.extract_csv_options(merged_options)
       ::SmarterCSV.process(csv_source, csv_options, &block)
     end
 
+    # @api private
+    # @private
     def transaction_if_needed(&block)
       merged_options[:wrap_in_transaction] ? import_into.transaction(&block) : yield
     end
 
+    # @api private
+    # @private
     def process_import_results(import_results)
       import_results.each_with_object(
         invalid_records: [],

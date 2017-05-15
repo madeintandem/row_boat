@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# @api private
 module RowBoat
   class ValueConverter
     attr_reader :converter

@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# @api private
 module RowBoat
   module Helpers
     CSV_OPTION_KEYS = %i[
