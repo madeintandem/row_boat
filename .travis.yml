@@ -10,3 +10,5 @@ before_script:
   - bundle exec rake db:create
   - bundle exec rake db:migrate
 cache: bundler
+gemfile:
+  - gemfiles/csv_import_1.1_and_0.18.gemfile
