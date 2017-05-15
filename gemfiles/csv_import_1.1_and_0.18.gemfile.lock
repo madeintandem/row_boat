@@ -138,6 +138,7 @@ DEPENDENCIES
   rubocop (~> 0.48.1)
   smarter_csv (~> 1.1.0)
   standalone_migrations (~> 5.2.0)
+  yard (~> 0.9.9)
 
 BUNDLED WITH
    1.14.6
