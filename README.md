@@ -4,7 +4,7 @@
 
 A simple gem to help you import CSVs into your ActiveRecord models.
 
-[Check out the documentation!](/API.md)
+[Check out the documentation!](/API.md#rowboat-api)
 
 It uses [SmarterCSV](https://github.com/tilo/smarter_csv) and [`activerecord-import`](https://github.com/zdennis/activerecord-import) to import database records from your CSVs.
 
@@ -26,9 +26,9 @@ Or install it yourself as:
 
 ## Basic Usage
 
-#### [Full documentation can be found here.](/API.md)
+#### [Full documentation can be found here.](/API.md#rowboat-api)
 
-Below we're defining the required methods ([`import_into`](/API.md#import_into) and [`column_mapping`](/API.md#column_mapping)) and a few additional options as well (via [`value_converters`](/API.md#value_converters) and [`options`](/API.md#options)). Checkout [API.md](/API.md) for the full documentation for more :)
+Below we're defining the required methods ([`import_into`](/API.md#import_into) and [`column_mapping`](/API.md#column_mapping)) and a few additional options as well (via [`value_converters`](/API.md#value_converters) and [`options`](/API.md#options)). Checkout [API.md](/API.md#rowboat-api) for the full documentation for more :)
 
 ```ruby
 class ImportProduct
