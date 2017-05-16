@@ -8,6 +8,14 @@ A simple gem to help you import CSVs into your ActiveRecord models.
 
 It uses [SmarterCSV](https://github.com/tilo/smarter_csv) and [`activerecord-import`](https://github.com/zdennis/activerecord-import) to import database records from your CSVs.
 
+## Contents
+
+- [Installation](#installation)
+- [Basic Usage](#basic-usage)
+- [Development](#development)
+- [Contributing](#contributing)
+- [License](#license)
+
 ## Installation
 
 Add this line to your application's Gemfile:
