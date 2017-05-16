@@ -1,5 +1,7 @@
 # RowBoat
 
+Created by &nbsp;&nbsp;&nbsp; [<img src="https://raw.githubusercontent.com/devmynd/row_boat/master/devmynd-logo.png" alt="DevMynd Logo" />](https://www.devmynd.com/)
+
 [![Gem Version](https://badge.fury.io/rb/row_boat.svg)](http://badge.fury.io/rb/row_boat) &nbsp;&nbsp;&nbsp;[![Build Status](https://travis-ci.org/devmynd/row_boat.svg?branch=master)](https://travis-ci.org/devmynd/row_boat)
 
 A simple gem to help you import CSVs into your ActiveRecord models.
