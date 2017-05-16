@@ -2,6 +2,41 @@
 
 This is really more of a summary of what you can do with `RowBoat::Base` since you subclass it to do everything :)
 
+## Contents
+
+- [Basic Usage](#basic-usage)
+- [`.import`](#`import)
+- [`initialize`](#initialize)
+- [`import`](#import-1)
+- [`import_into`](#import_into)
+- [`csv_source`](#csv_source)
+- [`column_mapping`](#column_mapping)
+- [`preprocess_row`](#preprocess_row)
+- [`preprocess_rows`](#preprocess_rows)
+- [`options`](#options)
+- [`handle_failed_row`](#handle_failed_row)
+- [`handle_failed_rows`](#handle_failed_rows)
+- [`value_converters`](#value_converters)
+
+## Basic Usage
+
+Just subclass `RowBoat::Base` and define the [`import_into`](#import_into) and [`column_mapping`](#column_mapping) methods to get started (They're the only methods that you're required to implement).
+
+```ruby
+class ImportProduct < RowBoat::Base
+  def import_into
+    Product
+  end
+
+  def column_mapping
+    {
+      downcased_csv_column_header: :model_attribute_name,
+      another_downcased_csv_column_header: :another_model_attribute_name
+    }
+  end
+end
+```
+
 ## `.import`
 
 ### Description
@@ -13,7 +48,7 @@ It returns a hash containing
 - `:total_inserted` - the total number of records inserted into the database.
 - `:inserted_ids` - an array of all of the ids of records inserted into the database.
 
-If you want to pass additional information to help import CSVs, *don't override this method*. It just passes through to `initialize` so override that :)
+If you want to pass additional information to help import CSVs, *don't override this method*. It just passes through to [`initialize`](#initialize) so override that :)
 
 ### Example
 
@@ -45,13 +80,13 @@ ImportProduct.import("path/to/my.csv", foo: "bar")
 
 ### Description
 
-Makes a new instance with the given CSV-like object. See `.import` for more details around when and how to override this method.
+Makes a new instance with the given CSV-like object. See [`.import`](#import) for more details around when and how to override this method.
 
 ## `import`
 
 ### Description
 
-The instance method that actually parses and imports the CSV. Generally, you wouldn't call this directly and would instead call `.import`.
+The instance method that actually parses and imports the CSV. Generally, you wouldn't call this directly and would instead call [`.import`](#import).
 
 ## `import_into`
 
@@ -126,7 +161,7 @@ By default
 - CSV column names are downcased symbols of what they look like in the CSV.
 - CSV columns that are not mapped are ignored when processing the CSV.
 
-If you're familiar with SmarterCSV, this method essentially defines your `:key_mapping` and with the `:remove_unmapped_keys` setting set to `true`.
+If you're familiar with [SmarterCSV](https://github.com/tilo/smarter_csv#documentation), this method essentially defines your `:key_mapping` and with the `:remove_unmapped_keys` setting set to `true`.
 
 You can change these defaults by overriding the `options` method.
 
@@ -152,7 +187,7 @@ Implement this method if you need to do some work on the row before the record i
 
 If you return `nil` from this method, the row will be skipped in the import.
 
-If the work you intend to do with the row only requires changing one attribute, it is recommended that you override `value_converters` instead of this.
+If the work you intend to do with the row only requires changing one attribute, it is recommended that you override [`value_converters`](#value_converters) instead of this.
 
 ### Example
 
@@ -177,9 +212,9 @@ If the work you intend to do with the row only requires changing one attribute, 
 
 ### Description
 
-Override this method if you need to do something with a chunk of rows (the chunk size is determined by the `:chunk_size` option in the `options` method).
+Override this method if you need to do something with a chunk of rows (the chunk size is determined by the `:chunk_size` option in the [`options`](#options) method).
 
-If you need to filter particular rows, it's better to just implement `preprocess_row` and return `nil` for the rows you want to ignore.
+If you need to filter particular rows, it's better to just implement [`preprocess_row`](#preprocess_row) and return `nil` for the rows you want to ignore.
 
 ### Example
 
@@ -204,7 +239,7 @@ end
 
 ### Description
 
-Implement this to configure RowBoat, SmarterCSV, and activerecord-import.
+Implement this to configure RowBoat, [SmarterCSV](https://github.com/tilo/smarter_csv), and [activerecord-import](https://github.com/zdennis/activerecord-import).
 
 Except for `:wrap_in_transaction`, all options pass through to SmarterCSV and activerecord-import.
 
@@ -220,7 +255,7 @@ Whatever you define in this method will be merged into the defaults.
   - `:value_converters` - `csv_value_converters`
   - `:wrap_in_transaction` - `true`
 
-Don't provide `value_converters` or `key_mapping` options here. Implement the `value_converters` and `column_mapping` respectively.
+Don't provide `value_converters` or `key_mapping` options here. Implement the [`value_converters`](#value_converters) and [`column_mapping`](#column_mapping) respectively.
 
 ### Example
 
@@ -245,9 +280,9 @@ Implement this to do some work with a row that has failed to import.
 
 It's important to note that
 - This happens after the import has completed.
-- The given row is an instance of whatever class was returned by `import_into`.
+- The given row is an instance of whatever class was returned by [`import_into`](#import_into).
 
-These records are also available in the return value of `.import`.
+These records are also available in the return value of [`.import`](#import).
 
 ### Example
 
@@ -284,14 +319,14 @@ end
 
 Implement to specify how to transalte values from the CSV into whatever sorts of objects you need. 
 
-Simply return a hash that has the mapped column name (ie, what you mapped it to in the `column_mapping` method) as a key pointing to either
+Simply return a hash that has the mapped column name (ie, what you mapped it to in the [`column_mapping`](#column_mapping) method) as a key pointing to either
 - a method name as a symbol
 - a proc or lambda
 - an object that implements `convert`
 
 Regardless of which one you choose, it take a value and return a converted value.
 
-This is essentially a sugared up version of `:value_converters` option in SmarterCSV.
+This is essentially a sugared up version of `:value_converters` option in [SmarterCSV](https://github.com/tilo/smarter_csv#documentation).
 
 ### Example
 
