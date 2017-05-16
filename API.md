@@ -5,7 +5,7 @@ This is really more of a summary of what you can do with `RowBoat::Base` since y
 ## Contents
 
 - [Basic Usage](#basic-usage)
-- [`.import`](#`import)
+- [`.import`](#import)
 - [`initialize`](#initialize)
 - [`import`](#import-1)
 - [`import_into`](#import_into)
