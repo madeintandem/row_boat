@@ -38,7 +38,7 @@ Or install it yourself as:
 
 #### [Full documentation can be found here.](/API.md#rowboat-api)
 
-Below we're defining the required methods ([`import_into`](/API.md#import_into) and [`column_mapping`](/API.md#column_mapping)) and a few additional options as well (via [`value_converters`](/API.md#value_converters) and [`options`](/API.md#options)). Checkout [API.md](/API.md#rowboat-api) for the full documentation for more :)
+Below we're defining the required methods ([`import_into`](/API.md#import_into) and [`column_mapping`](/API.md#column_mapping)) and a few additional options as well (via [`value_converters`](/API.md#value_converters) and [`options`](/API.md#options)). Checkout [API.md](/API.md#rowboat-api) for the full documentation for more details :)
 
 ```ruby
 class ImportProduct
