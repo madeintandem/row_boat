@@ -163,7 +163,7 @@ By default
 
 If you're familiar with [SmarterCSV](https://github.com/tilo/smarter_csv#documentation), this method essentially defines your `:key_mapping` and with the `:remove_unmapped_keys` setting set to `true`.
 
-You can change these defaults by overriding the `options` method.
+You can change these defaults by overriding the [`options`](#options) method.
 
 ### Example
 
@@ -245,7 +245,7 @@ Except for `:wrap_in_transaction`, all options pass through to SmarterCSV and ac
 
 `:wrap_in_transaction` simply tells RowBoat whether or not you want your whole import wrapped in a database transaction.
 
-Whatever you define in this method will be merged into the defaults.
+Whatever you define in this method will be merged into the defaults:
 
   - `:chunk_size` - `500`
   - `:key_mapping` - `column_mapping`
@@ -317,14 +317,14 @@ end
 
 ### Description
 
-Implement to specify how to transalte values from the CSV into whatever sorts of objects you need. 
+Implement to specify how to translate values from the CSV into whatever sorts of objects you need. 
 
 Simply return a hash that has the mapped column name (ie, what you mapped it to in the [`column_mapping`](#column_mapping) method) as a key pointing to either
 - a method name as a symbol
 - a proc or lambda
 - an object that implements `convert`
 
-Regardless of which one you choose, it take a value and return a converted value.
+Regardless of which one you choose, it takes a value and returns a converted value.
 
 This is essentially a sugared up version of `:value_converters` option in [SmarterCSV](https://github.com/tilo/smarter_csv#documentation).
 
@@ -337,7 +337,7 @@ class ImportProduct < RowBoat::Base
     {
       sell_by: :convert_date,
       name: -> (value) { value.titlelize },
-      price: proc { |value| value.to_i }
+      price: proc { |value| value.to_i },
       description: DescriptionConverter
     }
   end
