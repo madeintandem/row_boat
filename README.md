@@ -58,7 +58,7 @@ class ImportProduct
     if row[:name] && row[:description] && row[:price]
       row
     else
-      nil
+      nil # return nil to skip a row
     end
   end
 
