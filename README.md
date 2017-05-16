@@ -34,12 +34,15 @@ Below we're defining the required methods ([`import_into`](/API.md#import_into) 
 class ImportProduct
   # required
   def import_into
-    Product
+    Product # The ActiveRecord class we want to import records into.
   end
 
   # required
   def column_mapping
     {
+      # `:prdct_name` is the downcased and symbolized version
+      # of our column header, while `:name` is the attribute
+      # of our model we want to receive `:prdct_name`'s value
       prdct_name: :name,
       dllr_amnt: :price_in_cents,
       desc: :description
@@ -49,6 +52,8 @@ class ImportProduct
   # optional
   def value_converters
     {
+      # Allows us to change values we want to import
+      # before we import them
       price_in_cents: -> (value) { value * 1000 }
     }
   end
@@ -60,11 +65,16 @@ class ImportProduct
     else
       nil # return nil to skip a row
     end
+    # we could also remove some attributes or do any
+    # other kind of work we want with the given row.
   end
 
   #optional
   def options
     {
+      # These are additional configurations that
+      # are generally passed through to SmarterCSV
+      # and activerecord-import
       validate: false, # this defaults to `true`
       wrap_in_transaction: false # this defaults to `true`
     }
@@ -79,7 +89,6 @@ After checking out the repo, run `bin/setup` to install dependencies. Then, run 
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/devmynd/row_boat. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
-
 
 ## License
 
