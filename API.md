@@ -155,7 +155,7 @@ ImportProduct.import("path/to/product.csv")
 
 ### Description
 
-It is required that you override this method with a hash that maps columns in your CSV to their preferred names. 
+It is required that you override this method with a hash that maps columns in your CSV to their preferred names.
 
 By default
 - CSV column names are downcased symbols of what they look like in the CSV.
@@ -276,7 +276,7 @@ end
 
 ### Description
 
-Implement this to do some work with a row that has failed to import. 
+Implement this to do some work with a row that has failed to import.
 
 It's important to note that
 - This happens after the import has completed.
@@ -317,7 +317,7 @@ end
 
 ### Description
 
-Implement to specify how to translate values from the CSV into whatever sorts of objects you need. 
+Implement to specify how to translate values from the CSV into whatever sorts of objects you need.
 
 Simply return a hash that has the mapped column name (ie, what you mapped it to in the [`column_mapping`](#column_mapping) method) as a key pointing to either
 - a method name as a symbol
