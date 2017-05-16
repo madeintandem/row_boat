@@ -2,6 +2,8 @@
 
 This is really more of a summary of what you can do with `RowBoat::Base` since you subclass it to do everything :)
 
+---
+
 ## `.import`
 
 ### Description
@@ -41,17 +43,23 @@ end
 ImportProduct.import("path/to/my.csv", foo: "bar")
 ```
 
+---
+
 ## `initialize`
 
 ### Description
 
 Makes a new instance with the given CSV-like object. See `.import` for more details around when and how to override this method.
 
+---
+
 ## `import`
 
 ### Description
 
 The instance method that actually parses and imports the CSV. Generally, you wouldn't call this directly and would instead call `.import`.
+
+---
 
 ## `import_into`
 
@@ -91,6 +99,8 @@ ImportProduct.import("path/to/product.csv")
 ```
 
 
+---
+
 ## `csv_source`
 
 ### Description
@@ -115,6 +125,8 @@ end
 ImportProduct.import("path/to/category.csv")
 ImportProduct.import("path/to/product.csv")
 ```
+
+---
 
 ## `column_mapping`
 
@@ -143,6 +155,8 @@ class ImportProduct < RowBoat::Base
   end
 end
 ```
+
+---
 
 ## `preprocess_row`
 
@@ -173,6 +187,8 @@ If the work you intend to do with the row only requires changing one attribute, 
   end
 ```
 
+---
+
 ## `preprocess_rows`
 
 ### Description
@@ -199,6 +215,8 @@ class ImportProduct < RowBoat::Base
   end
 end
 ```
+
+---
 
 ## `options`
 
@@ -237,6 +255,8 @@ class ImportProduct < RowBoat::Base
 end
 ```
 
+---
+
 ## `handle_failed_row`
 
 ### Description
@@ -260,6 +280,8 @@ class ImportProduct < RowBoat::Base
 end
 ```
 
+---
+
 ## `handle_failed_rows`
 
 ### Description
@@ -277,6 +299,8 @@ class ImportProduct < RowBoat::Base
   end
 end
 ```
+
+---
 
 ## `value_converters`
 
