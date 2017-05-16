@@ -23,7 +23,7 @@ It uses [SmarterCSV](https://github.com/tilo/smarter_csv) and [`activerecord-imp
 Add this line to your application's Gemfile:
 
 ```ruby
-gem "row_boat"
+gem "row_boat", "~> 0.1"
 ```
 
 And then execute:
