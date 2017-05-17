@@ -228,6 +228,19 @@ module RowBoat
       end
     end
 
+    # Implement this method if you'd like to rollback the transaction
+    #   after it otherwise has completed.
+    #
+    # @abstract
+    #
+    # @note Only works if the `wrap_in_transaction` option is `true`
+    #   (which is the default)
+    #
+    # @return [Boolean]
+    def rollback_transaction?
+      false
+    end
+
     private
 
     # @private
@@ -267,8 +280,15 @@ module RowBoat
 
     # @api private
     # @private
-    def transaction_if_needed(&block)
-      merged_options[:wrap_in_transaction] ? import_into.transaction(&block) : yield
+    def transaction_if_needed
+      if merged_options[:wrap_in_transaction]
+        import_into.transaction do
+          yield
+          raise ActiveRecord::Rollback if rollback_transaction?
+        end
+      else
+        yield
+      end
     end
 
     # @api private

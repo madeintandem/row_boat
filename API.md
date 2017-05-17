@@ -17,6 +17,7 @@ This is really more of a summary of what you can do with `RowBoat::Base` since y
 - [`handle_failed_row`](#handle_failed_row)
 - [`handle_failed_rows`](#handle_failed_rows)
 - [`value_converters`](#value_converters)
+- [`rollback_transaction?`](#rollback_transaction)
 
 ## Basic Usage
 
@@ -361,6 +362,25 @@ end
 module DescriptionConverter
   def self.convert(value)
     value.present? ? value : "default description :("
+  end
+end
+```
+
+## `rollback_transaction?`
+
+### Description
+
+Implement this method if you'd like to rollback the transaction after it otherwise has completed.
+
+Note: imports are only wrapped in a transaction if the `wrap_in_transaction` option is `true`. It defaults to `true` but this can be configured in [`options`](#options)
+
+### Example
+
+```ruby
+class ImportProduct < RowBoat::Base
+  # required configuration omitted for brevity
+  def rollback_transaction?
+    CsvService.already_imported?(csv_source)
   end
 end
 ```

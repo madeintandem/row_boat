@@ -194,11 +194,13 @@ RSpec.describe RowBoat::Base do
 
     subject { import_class.new(product_csv_path) }
 
-    def build_subclass_with_options(added_options)
+    def build_subclass_with_options(added_options, &block)
       build_subclass do
         define_method :options do
           added_options
         end
+
+        instance_eval(&block) if block
       end
     end
 
@@ -241,20 +243,38 @@ RSpec.describe RowBoat::Base do
     end
 
     context "wrapping in a transaction" do
-      let(:import_class) do
-        build_subclass_with_options(wrap_in_transaction: true, chunk_size: 1)
+      context "invalid row" do
+        let(:import_class) do
+          build_subclass_with_options(wrap_in_transaction: true, chunk_size: 1)
+        end
+
+        subject { import_class.new(product_csv_path) }
+
+        before do
+          Product.create!(name: "foo", rank: 3)
+        end
+
+        it "wraps the imports in a transaction and rolls it back when there's an error" do
+          expect(Product.count).to eq(1)
+          expect { subject.import }.to raise_error(ActiveRecord::RecordNotUnique)
+          expect(Product.count).to eq(1)
+        end
       end
 
-      subject { import_class.new(product_csv_path) }
+      context "rollback_transaction? returns true" do
+        let(:import_class) do
+          build_subclass_with_options(wrap_in_transaction: true) do
+            define_method :rollback_transaction? do
+              true
+            end
+          end
+        end
 
-      before do
-        Product.create!(name: "foo", rank: 3)
-      end
+        subject { import_class.new(product_csv_path) }
 
-      it "wraps the imports in a transaction and rolls it back when there's an error" do
-        expect(Product.count).to eq(1)
-        expect { subject.import }.to raise_error(ActiveRecord::RecordNotUnique)
-        expect(Product.count).to eq(1)
+        it "rolls back the transaction" do
+          expect { subject.import }.to_not change(Product, :count)
+        end
       end
     end
 
@@ -578,6 +598,12 @@ RSpec.describe RowBoat::Base do
         expect(subject).to receive(converter_method).with(5)
         result.convert(5)
       end
+    end
+  end
+
+  describe "#rollback_transaction?" do
+    it "is false" do
+      expect(subject.rollback_transaction?).to eq(false)
     end
   end
 end
