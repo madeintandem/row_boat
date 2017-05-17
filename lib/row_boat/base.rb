@@ -120,6 +120,7 @@ module RowBoat
     # @see #preprocess_row
     def preprocess_rows(rows)
       rows.each_with_object([]) do |row, preprocessed_rows|
+        increment_row_number
         preprocessed_row = preprocess_row(row)
         preprocessed_rows << preprocessed_row unless preprocessed_row.nil?
       end
@@ -228,6 +229,15 @@ module RowBoat
     end
 
     private
+
+    # @private
+    attr_reader :row_number
+
+    # @api private
+    # @private
+    def increment_row_number
+      @row_number = row_number.to_i + 1
+    end
 
     # @api private
     # @private

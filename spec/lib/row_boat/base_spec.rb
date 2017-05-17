@@ -319,6 +319,25 @@ RSpec.describe RowBoat::Base do
         expect(Product.pluck(:name)).to all(end_with("-fu"))
       end
     end
+
+    context "row number" do
+      let(:import_class) do
+        build_subclass do
+          define_method :preprocess_row do |row|
+            row.merge(name: "#{row[:name]}-#{row_number}")
+          end
+        end
+      end
+      subject { import_class.new(product_csv_path) }
+
+      it "keeps track of row numbers" do
+        subject.import
+        expect(Product.count).to eq(3)
+        Product.pluck(:name).each_with_index do |name, i|
+          expect(name).to end_with("-#{i + 1}")
+        end
+      end
+    end
   end
 
   describe "#preprocess_row" do
