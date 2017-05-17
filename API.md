@@ -196,6 +196,8 @@ Implement this method if you need to do some work on the row before the record i
 
 If you return `nil` from this method, the row will be skipped in the import.
 
+You also have access to `row_number` here.
+
 If the work you intend to do with the row only requires changing one attribute, it is recommended that you override [`value_converters`](#value_converters) instead of this.
 
 ### Example
@@ -204,7 +206,7 @@ If the work you intend to do with the row only requires changing one attribute, 
   class ImportProduct < RowBoat::Base
     # required configuration omitted for brevity
     def preprocess_row(row)
-      { default: :value }.merge(row)
+      { position: row_number }.merge(row)
     end
     # or...
     def preprocess_row(row)
