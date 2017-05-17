@@ -87,20 +87,12 @@ RSpec.describe RowBoat::Base do
     let(:column_mapping) { { column: :map } }
     let(:value_converter_mapping) { { value: :converter } }
     before do
-      expect(subject).to receive(:column_mapping).and_return(column_mapping)
+      allow(subject).to receive(:column_mapping).and_return(column_mapping)
       expect(subject).to receive(:csv_value_converters).and_return(value_converter_mapping)
     end
 
     it "is a hash" do
       expect(subject.default_options).to be_a(Hash)
-    end
-
-    it "includes the column_mapping as `key_mapping`" do
-      expect(subject.default_options[:key_mapping]).to eq(column_mapping)
-    end
-
-    it "includes the `remove_unmapped_keys` as true" do
-      expect(subject.default_options[:remove_unmapped_keys]).to eq(true)
     end
 
     it "includes the `wrap_in_transaction` key as true" do
@@ -121,6 +113,46 @@ RSpec.describe RowBoat::Base do
 
     it "includes the value converters" do
       expect(subject.default_options[:value_converters]).to eq(value_converter_mapping)
+    end
+
+    context "column_mapping is a hash" do
+      let(:column_mapping) { { column: :map } }
+
+      it "includes the column_mapping as `key_mapping`" do
+        expect(subject.default_options[:key_mapping]).to eq(column_mapping)
+      end
+
+      it "includes nil as `user_provided_headers`" do
+        expect(subject.default_options[:user_provided_headers]).to be_nil
+      end
+
+      it "includes true as `remove_unmapped_keys`" do
+        expect(subject.default_options[:remove_unmapped_keys]).to eq(true)
+      end
+    end
+
+    context "column_mapping is an array" do
+      let(:column_mapping) { %i[column map] }
+
+      it "includes the column_mapping as `user_provided_headers`" do
+        expect(subject.default_options[:user_provided_headers]).to eq(column_mapping)
+      end
+
+      it "includes nil as `key_mapping`" do
+        expect(subject.default_options[:key_mapping]).to be_nil
+      end
+
+      it "includes nil as `remove_unmapped_keys`" do
+        expect(subject.default_options[:remove_unmapped_keys]).to be_nil
+      end
+    end
+
+    context "column_mapping is something besides an array or hash" do
+      let(:column_mapping) { 5 }
+
+      it "raises an error" do
+        expect { subject.default_options }.to raise_error(RowBoat::Base::InvalidColumnMapping, "#column_mapping must be a Hash or an Array: got `5`")
+      end
     end
   end
 
@@ -336,6 +368,28 @@ RSpec.describe RowBoat::Base do
         Product.pluck(:name).each_with_index do |name, i|
           expect(name).to end_with("-#{i + 1}")
         end
+      end
+    end
+
+    context "with an array as the column mapping" do
+      let(:import_class) do
+        build_subclass do
+          define_method :column_mapping do
+            %i[name rank description ignored]
+          end
+
+          define_method :preprocess_row do |row|
+            row.delete(:ignored)
+            row
+          end
+        end
+      end
+      subject { import_class.new(product_csv_path) }
+
+      it "maps the columns" do
+        subject.import
+        expect(Product.count).to eq(3)
+        expect(Product.pluck(:name)).to match_array(%w[foo bar baz])
       end
     end
   end

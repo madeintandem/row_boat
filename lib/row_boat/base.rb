@@ -6,6 +6,8 @@ require "smarter_csv"
 
 module RowBoat
   class Base
+    InvalidColumnMapping = Class.new(StandardError)
+
     attr_reader :csv_source
 
     class << self
@@ -154,13 +156,11 @@ module RowBoat
     def default_options
       {
         chunk_size: 500,
-        key_mapping: column_mapping,
         recursive: true,
-        remove_unmapped_keys: true,
         validate: true,
         value_converters: csv_value_converters,
         wrap_in_transaction: true
-      }
+      }.merge(column_mapping_options)
     end
 
     # @api private
@@ -237,6 +237,19 @@ module RowBoat
     # @private
     def increment_row_number
       @row_number = row_number.to_i + 1
+    end
+
+    # @api private
+    # @private
+    def column_mapping_options
+      case column_mapping
+      when Hash
+        { key_mapping: column_mapping, remove_unmapped_keys: true }
+      when Array
+        { user_provided_headers: column_mapping }
+      else
+        raise InvalidColumnMapping, "#column_mapping must be a Hash or an Array: got `#{column_mapping}`"
+      end
     end
 
     # @api private

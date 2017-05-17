@@ -155,13 +155,13 @@ ImportProduct.import("path/to/product.csv")
 
 ### Description
 
-It is required that you override this method with a hash that maps columns in your CSV to their preferred names.
+It is required that you override this method with either a hash that maps columns in your CSV to their preferred names or an array of your preferred column names.
 
-By default
+By default when using a hash
 - CSV column names are downcased symbols of what they look like in the CSV.
 - CSV columns that are not mapped are ignored when processing the CSV.
 
-If you're familiar with [SmarterCSV](https://github.com/tilo/smarter_csv#documentation), this method essentially defines your `:key_mapping` and with the `:remove_unmapped_keys` setting set to `true`.
+If you're familiar with [SmarterCSV](https://github.com/tilo/smarter_csv#documentation), this method essentially defines your `:key_mapping` with the `:remove_unmapped_keys` setting set to `true` when provided with a hash. When given an array it is the `:user_provided_headers` option.
 
 You can change these defaults by overriding the [`options`](#options) method.
 
@@ -175,6 +175,15 @@ class ImportProduct < RowBoat::Base
       prdct_nm: :name,
       "price/cost_amnt": :price_in_cents
     }
+  end
+end
+
+# or...
+
+class ImportProduct < RowBoat::Base
+  # other required configuration omitted for brevity
+  def column_mapping
+    [:name, :price_in_cents]
   end
 end
 ```
