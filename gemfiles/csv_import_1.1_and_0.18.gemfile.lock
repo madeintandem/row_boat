@@ -1,7 +1,7 @@
 PATH
   remote: ..
   specs:
-    row_boat (0.2.0)
+    row_boat (0.3.0)
       activerecord (>= 5.0.0)
       activerecord-import (~> 0.18.2)
       smarter_csv (~> 1.1)
