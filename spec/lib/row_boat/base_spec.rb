@@ -412,6 +412,24 @@ RSpec.describe RowBoat::Base do
         expect(Product.pluck(:name)).to match_array(%w[foo bar baz])
       end
     end
+
+    context "skipping rows" do
+      let(:import_class) do
+        build_subclass do
+          define_method :preprocess_row do |row|
+            row[:rank] > 1 ? nil : row
+          end
+        end
+      end
+      subject { import_class.new(product_csv_path) }
+
+      it "returns skipped rows" do
+        result = subject.import
+        expect(result[:skipped_rows]).to be_present
+        expect(result[:skipped_rows].size).to eq(2)
+        expect(result[:skipped_rows]).to all(be_a(Hash))
+      end
+    end
   end
 
   describe "#preprocess_row" do

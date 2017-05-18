@@ -48,6 +48,7 @@ It returns a hash containing
 - `:invalid_records` - an array of all records that failed to import since they were invalid. If you've configured the `:validate` option to be `false` it will be an empty array.
 - `:total_inserted` - the total number of records inserted into the database.
 - `:inserted_ids` - an array of all of the ids of records inserted into the database.
+- `:skipped_rows` - every row skipped by returning `nil` from [`preprocess_row`](#preprocess_row).
 
 If you want to pass additional information to help import CSVs, *don't override this method*. It just passes through to [`initialize`](#initialize) so override that :)
 
@@ -195,7 +196,7 @@ end
 
 Implement this method if you need to do some work on the row before the record is inserted/updated.
 
-If you return `nil` from this method, the row will be skipped in the import.
+If you return `nil` from this method, the row will be skipped in the import. You can access these rows in the return value from [`.import`](#import) (the `:skipped_rows` key).
 
 You also have access to `row_number` here.
 
