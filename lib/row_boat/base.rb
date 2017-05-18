@@ -40,7 +40,7 @@ module RowBoat
     # Parses the csv and inserts/updates the database. You probably won't call this method directly,
     # instead you would call {RowBoat::Base.import}.
     #
-    # @return [Hash] a hash with +:invalid_records+, +:total_inserted+ and +:inserted_ids+.
+    # @return [Hash] a hash with +:invalid_records+, +:total_inserted+, +:inserted_ids+, and +:skipped_rows+.
     def import
       import_results = []
 
