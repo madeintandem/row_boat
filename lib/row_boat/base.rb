@@ -156,7 +156,7 @@ module RowBoat
     def default_options
       {
         chunk_size: 500,
-        recursive: true,
+        recursive: false,
         validate: true,
         value_converters: csv_value_converters,
         wrap_in_transaction: true

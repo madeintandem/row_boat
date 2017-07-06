@@ -262,7 +262,7 @@ Whatever you define in this method will be merged into the defaults:
 
   - `:chunk_size` - `500`
   - `:key_mapping` - `column_mapping`
-  - `:recursive` - `true`
+  - `:recursive` - `false`
   - `:remove_unmapped_keys` - `true`
   - `:validate` - `true`
   - `:value_converters` - `csv_value_converters`

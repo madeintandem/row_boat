@@ -107,8 +107,8 @@ RSpec.describe RowBoat::Base do
       expect(subject.default_options[:validate]).to eq(true)
     end
 
-    it "includes the recursive key as true" do
-      expect(subject.default_options[:recursive]).to eq(true)
+    it "includes the recursive key as false" do
+      expect(subject.default_options[:recursive]).to eq(false)
     end
 
     it "includes the value converters" do
