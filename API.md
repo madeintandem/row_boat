@@ -46,7 +46,7 @@ Imports database records form the given CSV-like object. The CSV-like object can
 It returns a hash containing
 
 - `:invalid_records` - an array of all records that failed to import since they were invalid. If you've configured the `:validate` option to be `false` it will be an empty array.
-- `:total_inserted` - the total number of records inserted into the database.
+- `:total_inserts` - the total number of database inserts that were run.
 - `:inserted_ids` - an array of all of the ids of records inserted into the database.
 - `:skipped_rows` - every row skipped by returning `nil` from [`preprocess_row`](#preprocess_row).
 

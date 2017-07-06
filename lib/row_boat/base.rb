@@ -16,7 +16,7 @@ module RowBoat
       # @overload import(csv_source)
       #   @param csv_source [String, #read] a CSV-like object that SmarterCSV can read.
       #
-      # @return [Hash] a hash with +:invalid_records+, +:total_inserted+, +:inserted_ids+, and +:skipped_rows+.
+      # @return [Hash] a hash with +:invalid_records+, +:total_inserts+, +:inserted_ids+, and +:skipped_rows+.
       #
       # @see https://github.com/tilo/smarter_csv#documentation SmarterCSV Docs
       def import(*args, &block)
@@ -40,7 +40,7 @@ module RowBoat
     # Parses the csv and inserts/updates the database. You probably won't call this method directly,
     # instead you would call {RowBoat::Base.import}.
     #
-    # @return [Hash] a hash with +:invalid_records+, +:total_inserted+, +:inserted_ids+, and +:skipped_rows+.
+    # @return [Hash] a hash with +:invalid_records+, +:total_inserts+, +:inserted_ids+, and +:skipped_rows+.
     def import
       import_results = []
 
@@ -305,12 +305,12 @@ module RowBoat
     def process_import_results(import_results)
       import_results.each_with_object(
         invalid_records: [],
-        total_inserted: 0,
+        total_inserts: 0,
         inserted_ids: [],
         skipped_rows: skipped_rows
       ) do |import_result, total_results|
         total_results[:invalid_records] += import_result.failed_instances
-        total_results[:total_inserted] += import_result.num_inserts
+        total_results[:total_inserts] += import_result.num_inserts
         total_results[:inserted_ids] += import_result.ids
       end
     end

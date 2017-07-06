@@ -221,12 +221,12 @@ RSpec.describe RowBoat::Base do
       subject.import
     end
 
-    context "total inserted" do
+    context "total inserts" do
       let(:import_class) { build_subclass_with_options(chunk_size: 1) }
       subject { import_class.new(product_csv_path) }
 
       it "is the total number of records inserted" do
-        expect(subject.import[:total_inserted]).to eq(3)
+        expect(subject.import[:total_inserts]).to eq(3)
       end
     end
 
